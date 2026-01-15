@@ -33,7 +33,7 @@ const Contact: React.FC<ContactProps> = ({ t }) => {
                 <Mail className="mt-1" />
                 <div>
                   <h4 className="text-white font-bold uppercase tracking-wider mb-1">{t.contact.emailLabel}</h4>
-                  <p>hello@homeofdesign.com</p>
+                  <p>info@homeofdesignstudio.com</p>
                 </div>
               </div>
 
@@ -41,7 +41,7 @@ const Contact: React.FC<ContactProps> = ({ t }) => {
                 <Phone className="mt-1" />
                 <div>
                   <h4 className="text-white font-bold uppercase tracking-wider mb-1">{t.contact.phoneLabel}</h4>
-                  <p dir="ltr" className="text-left md:text-start">+971 4 123 4567</p>
+                  <p dir="ltr" className="text-left md:text-start">+46722117655</p>
                 </div>
               </div>
             </div>
