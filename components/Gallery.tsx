@@ -8,12 +8,12 @@ interface GalleryProps {
 
 // Placeholder architectural images
 const IMAGES = [
-  'https://image2url.com/r2/default/images/1768181916837-cc2529c6-0a5e-41ab-9c87-16847af5d792.png', // Project 1: User provided image
-  'https://image2url.com/r2/default/images/1768190857488-53831088-fa5b-4802-970c-528fce29e5a7.png', // Project 2: User provided image
-  'https://image2url.com/r2/default/images/1768200380016-d52506af-bd5f-44c2-a673-98e9c827b191.png', // Project 3: User provided image
-  'https://image2url.com/r2/default/images/1768200137068-d3171240-62a1-4445-9321-1225b0fcccbc.png', // Project 4: User provided image
-  'https://image2url.com/r2/default/images/1768205412768-4bcfb6c2-08e7-41c8-875f-73cd2e1ecf88.png', // Project 5: User provided image
-  'https://image2url.com/r2/default/images/1768208462838-f315b567-74ba-42da-9e5d-a56324330f4f.png', // Project 6: User provided image
+  'https://i.postimg.cc/qMgNWY2V/Home-Of-Design-Studio-com-new.png', // Project 1: User provided image
+  'https://i.postimg.cc/cCrfDzXg/Home-Of-Design-Studio-com.png', // Project 2: User provided image
+  'https://i.postimg.cc/RVLY56RT/Home-Of-Design-Studio-(1).png', // Project 3: User provided image
+  'https://i.postimg.cc/c1vKb2Rs/Home-Of-Design-Studio-com-new.png', // Project 4: User provided image
+  'https://i.postimg.cc/DyKX45Xg/new-2.png', // Project 5: User provided image
+  'https://i.postimg.cc/XvNhjwLp/Home-Of-Design-Studio-com-new.png', // Project 6: User provided image
 ];
 
 const Gallery: React.FC<GalleryProps> = ({ t }) => {
