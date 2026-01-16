@@ -41,7 +41,7 @@ const Contact: React.FC<ContactProps> = ({ t }) => {
                 <Phone className="mt-1" />
                 <div>
                   <h4 className="text-white font-bold uppercase tracking-wider mb-1">{t.contact.phoneLabel}</h4>
-                  <p dir="ltr" className="text-left md:text-start">+46722117655</p>
+                  <p dir="ltr" className="text-left md:text-start">+46766166570</p>
                 </div>
               </div>
             </div>
