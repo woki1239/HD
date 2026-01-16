@@ -14,7 +14,8 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showLangMenu, setShowLangMenu] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false); // Desktop dropdown
+  const [showMobileLang, setShowMobileLang] = useState(false); // Mobile header dropdown
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -53,7 +54,7 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
             </button>
           ))}
           
-          {/* Language Switcher */}
+          {/* Desktop Language Switcher */}
           <div className="relative">
             <button 
               onClick={() => setShowLangMenu(!showLangMenu)}
@@ -90,10 +91,51 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
           </div>
         </div>
 
-        {/* Mobile Toggle */}
-        <button className="md:hidden text-white" onClick={() => setIsOpen(true)}>
-          <Menu size={28} />
-        </button>
+        {/* Mobile Controls */}
+        <div className="flex items-center gap-3 md:hidden">
+          {/* Mobile Language Switcher (Visible in header) */}
+          <div className="relative">
+            <button
+              onClick={() => setShowMobileLang(!showMobileLang)}
+              className="flex items-center gap-2 px-3 py-2 rounded-full border border-slate-700 bg-slate-900/50 hover:bg-slate-800 transition text-xs font-bold uppercase tracking-wider text-white"
+            >
+              <span className="text-sm">{currentLang?.flag}</span>
+              <span>{currentLang?.code.toUpperCase()}</span>
+            </button>
+
+            <AnimatePresence>
+              {showMobileLang && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden z-50"
+                >
+                  <div className="max-h-[60vh] overflow-y-auto">
+                    {LANGUAGES.map((l) => (
+                      <button
+                        key={l.code}
+                        onClick={() => {
+                          setLang(l.code);
+                          setShowMobileLang(false);
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-slate-800 flex items-center justify-between group border-b border-slate-800/50 last:border-0"
+                      >
+                        <span className={`text-sm ${lang === l.code ? 'text-blue-400 font-bold' : 'text-slate-300'}`}>{l.label}</span>
+                        <span className="text-base">{l.flag}</span>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Hamburger Toggle */}
+          <button className="text-white p-1" onClick={() => setIsOpen(true)}>
+            <Menu size={28} />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu Overlay */}
@@ -119,7 +161,8 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
               </button>
             ))}
 
-            <div className="flex flex-wrap justify-center gap-4 mt-8 px-6">
+            {/* Fallback language list in menu (optional, can be kept for visibility) */}
+            <div className="flex flex-wrap justify-center gap-4 mt-8 px-6 max-w-sm">
               {LANGUAGES.map((l) => (
                 <button
                   key={l.code}
@@ -127,9 +170,9 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
                     setLang(l.code);
                     setIsOpen(false);
                   }}
-                  className={`px-4 py-2 rounded-lg border ${lang === l.code ? 'border-blue-500 bg-blue-500/20 text-white' : 'border-slate-800 text-slate-400'}`}
+                  className={`px-3 py-2 rounded-lg border text-sm flex items-center gap-2 ${lang === l.code ? 'border-blue-500 bg-blue-500/20 text-white' : 'border-slate-800 text-slate-400'}`}
                 >
-                  {l.flag} {l.code.toUpperCase()}
+                  <span>{l.flag}</span> {l.code.toUpperCase()}
                 </button>
               ))}
             </div>
