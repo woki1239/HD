@@ -23,6 +23,18 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   const scrollTo = (id: string) => {
     setIsOpen(false);
     const element = document.getElementById(id);
