@@ -21,12 +21,52 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
   const [showMobileLang, setShowMobileLang] = useState(false);
   
   const overlayRef = useRef<HTMLDivElement>(null);
+  const desktopLangRef = useRef<HTMLDivElement>(null);
+  const mobileLangRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // --------------------------------------------------------------------------
+  // DROPDOWN CLICK OUTSIDE & ESCAPE LOGIC
+  // --------------------------------------------------------------------------
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      
+      // Desktop Dropdown
+      if (showLangMenu && desktopLangRef.current && !desktopLangRef.current.contains(target)) {
+        setShowLangMenu(false);
+      }
+
+      // Mobile Dropdown
+      if (showMobileLang && mobileLangRef.current && !mobileLangRef.current.contains(target)) {
+        setShowMobileLang(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowLangMenu(false);
+        setShowMobileLang(false);
+      }
+    };
+
+    if (showLangMenu || showMobileLang) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [showLangMenu, showMobileLang]);
 
   // --------------------------------------------------------------------------
   // SCROLL BLOCKING LOGIC (Preserved)
@@ -100,7 +140,7 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
           ))}
           
           {/* Desktop Language Switcher */}
-          <div className="relative">
+          <div className="relative" ref={desktopLangRef}>
             <motion.button 
               onClick={() => setShowLangMenu(!showLangMenu)}
               whileHover={{ scale: 1.05, backgroundColor: 'rgba(30, 41, 59, 0.8)' }}
@@ -141,7 +181,7 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
 
         {/* Mobile Controls */}
         <div className="flex items-center gap-3 md:hidden">
-          <div className="relative">
+          <div className="relative" ref={mobileLangRef}>
             <motion.button
               onClick={() => setShowMobileLang(!showMobileLang)}
               whileTap={{ scale: 0.95 }}
