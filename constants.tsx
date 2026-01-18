@@ -226,7 +226,7 @@ const SV_TRANSLATION: Translation = {
   },
   hero: {
     label: 'Home of Design',
-    headline: 'Marknadsföringsbyrå',
+    headline: 'Marknadsförings|Byrå',
     subheadline: 'Design / Marknadsföring',
     cta: 'Utforska Vår Vision',
   },
@@ -328,7 +328,7 @@ const NO_TRANSLATION: Translation = {
   },
   hero: {
     label: 'Home of Design',
-    headline: 'Markedsføringsbyrå',
+    headline: 'Markedsførings|Byrå',
     subheadline: 'Design / Markedsføring',
     cta: 'Utforsk Vår Visjon',
   },
@@ -750,7 +750,7 @@ const PT_TRANSLATION: Translation = {
         title: 'Marca e Identidade Visual',
         icon: 'Palette',
         items: [
-          { title: 'Design e Desenvolvimento de Marca', description: 'Definindo valores fundamentais e linguagem visual.' },
+          { title: 'Design e Desenvolvimento de Marca', description: 'Definiendo valores fundamentais e linguagem visual.' },
           { title: 'Sistemas de Identidade Visual', description: 'Ativos coesos em todos os pontos de contato.' },
         ],
       },

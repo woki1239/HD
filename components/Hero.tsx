@@ -97,10 +97,17 @@ const Hero: React.FC<HeroProps> = ({ t }) => {
               {t.hero.label}
             </motion.h2>
             
-            <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl lg:text-8xl font-heading font-black text-white leading-tight mb-6">
-              {t.hero.headline.split(' ').map((word, i) => (
-                <span key={i} className="inline-block mr-4 rtl:ml-4 rtl:mr-0 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-                  {word}
+            <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl md:text-4xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-heading font-black text-white leading-[1.1] md:leading-[1.1] lg:leading-tight mb-6 break-words max-w-full">
+              {t.hero.headline.split('|').map((line, i) => (
+                <span key={i} className="block">
+                  {line.split(' ').map((word, j) => (
+                    <span 
+                      key={j} 
+                      className="inline-block mr-2 sm:mr-4 last:mr-0 rtl:ml-2 rtl:sm:ml-4 rtl:mr-0 rtl:last:ml-0 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400"
+                    >
+                      {word}
+                    </span>
+                  ))}
                 </span>
               ))}
             </motion.h1>
