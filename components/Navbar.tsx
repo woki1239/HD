@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Globe } from 'lucide-react';
 import { Language, Translation } from '../types';
@@ -11,78 +11,114 @@ interface NavbarProps {
   t: Translation;
 }
 
+// Premium easing for UI elements
+const EASE_CUSTOM: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showLangMenu, setShowLangMenu] = useState(false); // Desktop dropdown
-  const [showMobileLang, setShowMobileLang] = useState(false); // Mobile header dropdown
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  const [showMobileLang, setShowMobileLang] = useState(false);
+  
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Lock body scroll when mobile menu is open
+  // --------------------------------------------------------------------------
+  // SCROLL BLOCKING LOGIC (Preserved)
+  // --------------------------------------------------------------------------
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    const overlay = overlayRef.current;
+    if (!isOpen || !overlay) return;
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      const scrollable = target.closest('.menu-scroll-container');
+
+      if (!scrollable) {
+        if (e.cancelable) e.preventDefault();
+      } else {
+        e.stopPropagation(); 
+      }
+    };
+
+    overlay.addEventListener('touchmove', handleTouchMove, { passive: false });
     return () => {
-      document.body.style.overflow = 'unset';
+      overlay.removeEventListener('touchmove', handleTouchMove);
     };
   }, [isOpen]);
 
-  const scrollTo = (id: string) => {
+  const handleLinkClick = (id: string) => {
     setIsOpen(false);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    setTimeout(() => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 400); // Slightly adjusted to match new exit animation
   };
 
   const currentLang = LANGUAGES.find(l => l.code === lang);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-slate-950/80 backdrop-blur-md border-b border-slate-800' : 'bg-transparent'}`}>
+    <nav 
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        isScrolled 
+          ? 'bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/50' 
+          : 'bg-transparent'
+      }`}
+    >
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => scrollTo('home')}>
-          <Logo className="w-10 h-10" />
-          <span className="text-2xl font-heading font-bold tracking-wider text-white hidden sm:block">HD</span>
+        <div 
+          className="flex items-center gap-2 cursor-pointer group" 
+          onClick={() => handleLinkClick('home')}
+        >
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Logo className="w-10 h-10" />
+          </motion.div>
+          <span className="text-2xl font-heading font-bold tracking-wider text-white hidden sm:block group-hover:text-blue-400 transition-colors duration-300">HD</span>
         </div>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
           {Object.entries(t.nav).map(([key, label]) => (
-            <button 
+            <motion.button 
               key={key} 
-              onClick={() => scrollTo(key)} 
-              className="text-slate-300 hover:text-blue-400 transition-colors uppercase text-sm tracking-widest font-medium"
+              onClick={() => handleLinkClick(key)} 
+              whileHover={{ scale: 1.05, color: '#60a5fa' }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="text-slate-300 transition-colors uppercase text-sm tracking-widest font-medium"
             >
               {label}
-            </button>
+            </motion.button>
           ))}
           
           {/* Desktop Language Switcher */}
           <div className="relative">
-            <button 
+            <motion.button 
               onClick={() => setShowLangMenu(!showLangMenu)}
-              className="flex items-center gap-2 px-3 py-1 rounded-full border border-slate-700 bg-slate-900/50 hover:bg-slate-800 transition text-sm"
+              whileHover={{ scale: 1.05, backgroundColor: 'rgba(30, 41, 59, 0.8)' }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-3 py-1 rounded-full border border-slate-700 bg-slate-900/50 transition-colors text-sm"
             >
               <Globe size={14} />
               <span>{currentLang?.code.toUpperCase()}</span>
-            </button>
+            </motion.button>
 
             <AnimatePresence>
               {showLangMenu && (
                 <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden"
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: EASE_CUSTOM }}
+                  className="absolute top-full right-0 mt-2 w-48 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-xl shadow-2xl overflow-hidden"
                 >
                   {LANGUAGES.map((l) => (
                     <button
@@ -91,9 +127,9 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
                         setLang(l.code);
                         setShowLangMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left hover:bg-slate-800 flex items-center justify-between group"
+                      className="w-full px-4 py-2 text-left hover:bg-slate-800 flex items-center justify-between group transition-colors duration-200"
                     >
-                      <span className="text-slate-300 group-hover:text-white transition">{l.label}</span>
+                      <span className="text-slate-300 group-hover:text-white transition-colors">{l.label}</span>
                       <span className="text-lg">{l.flag}</span>
                     </button>
                   ))}
@@ -105,15 +141,15 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
 
         {/* Mobile Controls */}
         <div className="flex items-center gap-3 md:hidden">
-          {/* Mobile Language Switcher (Visible in header) */}
           <div className="relative">
-            <button
+            <motion.button
               onClick={() => setShowMobileLang(!showMobileLang)}
+              whileTap={{ scale: 0.95 }}
               className="flex items-center gap-2 px-3 py-2 rounded-full border border-slate-700 bg-slate-900/50 hover:bg-slate-800 transition text-xs font-bold uppercase tracking-wider text-white"
             >
               <span className="text-sm">{currentLang?.flag}</span>
               <span>{currentLang?.code.toUpperCase()}</span>
-            </button>
+            </motion.button>
 
             <AnimatePresence>
               {showMobileLang && (
@@ -121,7 +157,8 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden z-50"
+                  transition={{ duration: 0.2, ease: EASE_CUSTOM }}
+                  className="absolute top-full right-0 mt-2 w-48 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-xl shadow-2xl overflow-hidden z-50"
                 >
                   <div className="max-h-[60vh] overflow-y-auto">
                     {LANGUAGES.map((l) => (
@@ -143,10 +180,13 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
             </AnimatePresence>
           </div>
 
-          {/* Hamburger Toggle */}
-          <button className="text-white p-1" onClick={() => setIsOpen(true)}>
+          <motion.button 
+            className="text-white p-1" 
+            onClick={() => setIsOpen(true)}
+            whileTap={{ scale: 0.9 }}
+          >
             <Menu size={28} />
-          </button>
+          </motion.button>
         </div>
       </div>
 
@@ -154,39 +194,54 @@ const Navbar: React.FC<NavbarProps> = ({ lang, setLang, t }) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div 
+            ref={overlayRef}
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
-            className="fixed inset-0 bg-slate-950 z-50 flex flex-col items-center justify-center space-y-8"
+            // Snappy spring physics for "drawer" feel
+            transition={{ type: "spring", damping: 35, stiffness: 350, mass: 0.8 }}
+            className="fixed inset-0 h-[100vh] w-[100vw] z-[100] bg-slate-950 pointer-events-auto flex flex-col"
           >
-            <button className="absolute top-6 right-6 text-white" onClick={() => setIsOpen(false)}>
+            <motion.button 
+              className="absolute top-6 right-6 text-white z-20 p-2" 
+              onClick={() => setIsOpen(false)}
+              whileTap={{ scale: 0.9 }}
+            >
               <X size={32} />
-            </button>
+            </motion.button>
             
-            {Object.entries(t.nav).map(([key, label]) => (
-              <button 
-                key={key} 
-                onClick={() => scrollTo(key)} 
-                className="text-2xl font-heading text-white hover:text-blue-500 uppercase tracking-widest"
-              >
-                {label}
-              </button>
-            ))}
+            <div className="menu-scroll-container flex-1 w-full overflow-y-auto overflow-x-hidden overscroll-contain flex flex-col items-center justify-center py-10 min-h-0">
+              <div className="flex flex-col items-center justify-center space-y-8 w-full shrink-0">
+                {Object.entries(t.nav).map(([key, label], i) => (
+                  <motion.button 
+                    key={key} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + (i * 0.05), duration: 0.4, ease: EASE_CUSTOM }}
+                    onClick={() => handleLinkClick(key)} 
+                    whileTap={{ scale: 0.95 }}
+                    className="text-3xl font-heading text-white hover:text-blue-500 uppercase tracking-widest font-bold"
+                  >
+                    {label}
+                  </motion.button>
+                ))}
+              </div>
 
-            {/* Fallback language list in menu (optional, can be kept for visibility) */}
-            <div className="flex flex-wrap justify-center gap-4 mt-8 px-6 max-w-sm">
-              {LANGUAGES.map((l) => (
-                <button
-                  key={l.code}
-                  onClick={() => {
-                    setLang(l.code);
-                    setIsOpen(false);
-                  }}
-                  className={`px-3 py-2 rounded-lg border text-sm flex items-center gap-2 ${lang === l.code ? 'border-blue-500 bg-blue-500/20 text-white' : 'border-slate-800 text-slate-400'}`}
-                >
-                  <span>{l.flag}</span> {l.code.toUpperCase()}
-                </button>
-              ))}
+              <div className="flex flex-wrap justify-center gap-4 mt-12 px-6 max-w-sm shrink-0">
+                {LANGUAGES.map((l) => (
+                  <motion.button
+                    key={l.code}
+                    onClick={() => {
+                      setLang(l.code);
+                      setIsOpen(false);
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`px-3 py-2 rounded-lg border text-sm flex items-center gap-2 ${lang === l.code ? 'border-blue-500 bg-blue-500/20 text-white' : 'border-slate-800 text-slate-400'}`}
+                  >
+                    <span>{l.flag}</span> {l.code.toUpperCase()}
+                  </motion.button>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
