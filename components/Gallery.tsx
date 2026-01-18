@@ -19,13 +19,13 @@ const Gallery: React.FC<GalleryProps> = ({ t }) => {
   return (
     <section id="gallery" className="py-32 bg-slate-950 overflow-hidden">
       <div className="container mx-auto px-6">
-        <div className="flex flex-col md:flex-row items-end justify-between mb-16">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16">
           <motion.h2 
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-10%" }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl md:text-6xl font-heading font-black text-white"
+            className="text-4xl md:text-6xl font-heading font-black text-white w-full md:w-auto text-start break-words max-w-full"
           >
             {t.gallery.titleSelected} <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">{t.gallery.titleWorks}</span>
           </motion.h2>
@@ -35,7 +35,7 @@ const Gallery: React.FC<GalleryProps> = ({ t }) => {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-slate-400 mt-4 md:mt-0 font-light"
+            className="text-slate-400 mt-4 md:mt-0 font-light self-start md:self-auto"
           >
             {t.gallery.subtitle}
           </motion.p>

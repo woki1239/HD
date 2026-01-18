@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Translation } from '../types';
 import { Send, Mail, MapPin, Phone } from 'lucide-react';
@@ -8,6 +8,18 @@ interface ContactProps {
 }
 
 const Contact: React.FC<ContactProps> = ({ t }) => {
+  // Keep state for controlled inputs so typing works, but submission is native
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: ''
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   return (
     <section id="contact" className="py-32 bg-slate-950 relative overflow-hidden">
       {/* Decorative Circles */}
@@ -54,39 +66,83 @@ const Contact: React.FC<ContactProps> = ({ t }) => {
 
           {/* Form Side */}
           <div className="lg:w-2/3">
-            <motion.form 
+            <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-slate-900/50 p-8 md:p-10 rounded-3xl border border-slate-800 backdrop-blur-sm"
-              onSubmit={(e) => e.preventDefault()}
+              className="bg-slate-900/50 p-8 md:p-10 rounded-3xl border border-slate-800 backdrop-blur-sm min-h-[500px] flex flex-col justify-center"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div className="space-y-2">
-                  <label className="text-xs text-slate-500 uppercase font-bold tracking-widest">{t.contact.name}</label>
-                  <input type="text" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-4 text-white focus:outline-none focus:border-blue-500 transition-colors duration-300" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs text-slate-500 uppercase font-bold tracking-widest">{t.contact.email}</label>
-                  <input type="email" className="w-full bg-slate-950 border border-slate-800 rounded-lg p-4 text-white focus:outline-none focus:border-blue-500 transition-colors duration-300" />
-                </div>
-              </div>
-              
-              <div className="space-y-2 mb-8">
-                <label className="text-xs text-slate-500 uppercase font-bold tracking-widest">{t.contact.message}</label>
-                <textarea rows={5} className="w-full bg-slate-950 border border-slate-800 rounded-lg p-4 text-white focus:outline-none focus:border-blue-500 transition-colors duration-300" />
-              </div>
-
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-lg flex items-center justify-center gap-3 transition-colors duration-300 shadow-lg shadow-blue-900/20"
+              {/* Native HTML Form Submission to FormSubmit */}
+              <motion.form 
+                action="https://formsubmit.co/info@homeofdesignstudio.com"
+                method="POST"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="h-full flex flex-col"
               >
-                <span>{t.contact.submit}</span>
-                <Send size={18} className="rtl:rotate-180" />
-              </motion.button>
-            </motion.form>
+                {/* Required Hidden Fields for FormSubmit */}
+                <input type="hidden" name="_captcha" value="false" />
+                <input type="hidden" name="_template" value="table" />
+                <input type="hidden" name="_subject" value="New contact from website" />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="space-y-2">
+                    <label className="text-xs text-slate-500 uppercase font-bold tracking-widest">
+                      {t.contact.name} <span className="text-red-500">*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      name="name"
+                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg p-4 text-white focus:outline-none focus:border-blue-500 transition-colors duration-300" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs text-slate-500 uppercase font-bold tracking-widest">
+                      {t.contact.email} <span className="text-red-500">*</span>
+                    </label>
+                    <input 
+                      type="email" 
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg p-4 text-white focus:outline-none focus:border-blue-500 transition-colors duration-300" 
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2 mb-8 flex-1">
+                  <label className="text-xs text-slate-500 uppercase font-bold tracking-widest">
+                    {t.contact.message} <span className="text-red-500">*</span>
+                  </label>
+                  <textarea 
+                    rows={5} 
+                    name="message"
+                    required
+                    value={formData.message}
+                    onChange={handleChange}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-4 text-white focus:outline-none focus:border-blue-500 transition-colors duration-300 resize-none h-full min-h-[150px]" 
+                  />
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <motion.button 
+                    type="submit"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-lg flex items-center justify-center gap-3 transition-colors duration-300 shadow-lg shadow-blue-900/20"
+                  >
+                    <span>{t.contact.submit}</span>
+                    <Send size={18} className="rtl:rotate-180" />
+                  </motion.button>
+                </div>
+              </motion.form>
+            </motion.div>
           </div>
         </div>
       </div>
