@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { Translation } from '../types';
 import { Logo } from './Logo';
 
@@ -7,41 +7,43 @@ interface HeroProps {
   t: Translation;
 }
 
-// Premium ease-out-expo curve for UI entrances
+// Snappy entrance curve
 const EASE_ENTRANCE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 const Hero: React.FC<HeroProps> = ({ t }) => {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   
-  // Parallax with subtle movement
   const y = useTransform(scrollY, [0, 500], [0, 150]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
   
-  // Mouse move parallax effect
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [rotateX, setRotateX] = useState(0);
-  const [rotateY, setRotateY] = useState(0);
+  const x = useMotionValue(0);
+  const yRotate = useMotionValue(0);
+  
+  const mouseX = useSpring(x, { stiffness: 150, damping: 15 });
+  const mouseY = useSpring(yRotate, { stiffness: 150, damping: 15 });
+
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], [8, -8]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], [-8, 8]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
     
-    // Reduced rotation range for classier feel
-    const rotateXValue = ((y - centerY) / centerY) * -8; 
-    const rotateYValue = ((x - centerX) / centerX) * 8;
-
-    setRotateX(rotateXValue);
-    setRotateY(rotateYValue);
+    const mouseXPos = e.clientX - rect.left;
+    const mouseYPos = e.clientY - rect.top;
+    
+    const xPct = (mouseXPos / width) - 0.5;
+    const yPct = (mouseYPos / height) - 0.5;
+    
+    x.set(xPct);
+    yRotate.set(yPct);
   };
 
   const handleMouseLeave = () => {
-    setRotateX(0);
-    setRotateY(0);
+    x.set(0);
+    yRotate.set(0);
   };
 
   const containerVariants = {
@@ -49,36 +51,35 @@ const Hero: React.FC<HeroProps> = ({ t }) => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2,
+        // REMOVED STAGGER DELAY: All items appear almost instantly
+        staggerChildren: 0.05,
+        delayChildren: 0,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 10 },
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.8, ease: EASE_ENTRANCE }
+      transition: { duration: 0.5, ease: EASE_ENTRANCE }
     },
   };
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950 pt-20">
-      {/* Background Abstract Grids - Smoother mask */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_30%,transparent_100%)] opacity-20 pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_30%,transparent_100%)] opacity-20 pointer-events-none will-change-transform" />
       
-      {/* Ambient Orbs - Slower animation */}
       <motion.div 
         animate={{ opacity: [0.5, 0.3, 0.5], scale: [1, 1.05, 1] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[128px] pointer-events-none" 
+        className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[128px] pointer-events-none will-change-transform" 
       />
       <motion.div 
         animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.1, 1] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/20 rounded-full blur-[128px] pointer-events-none" 
+        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/20 rounded-full blur-[128px] pointer-events-none will-change-transform" 
       />
 
       <motion.div 
@@ -86,7 +87,6 @@ const Hero: React.FC<HeroProps> = ({ t }) => {
         style={{ y, opacity }}
         className="container mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center justify-between"
       >
-        {/* Text Content */}
         <div className="md:w-1/2 text-center md:text-start mb-12 md:mb-0 rtl:md:text-right">
           <motion.div
             variants={containerVariants}
@@ -132,13 +132,12 @@ const Hero: React.FC<HeroProps> = ({ t }) => {
           </motion.div>
         </div>
 
-        {/* 3D Interactive Card */}
         <div className="md:w-1/2 flex justify-center perspective-1000">
           <motion.div
+            // INSTANT APPEARANCE: Reduced duration, removed delay
             initial={{ opacity: 0, scale: 0.9, rotateY: 15 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-            transition={{ duration: 1, ease: EASE_ENTRANCE, delay: 0.4 }}
-            ref={cardRef}
+            transition={{ duration: 0.6, ease: EASE_ENTRANCE }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{ 
@@ -146,11 +145,8 @@ const Hero: React.FC<HeroProps> = ({ t }) => {
               rotateY,
               transformStyle: 'preserve-3d' 
             }}
-            className="relative w-80 h-80 md:w-[500px] md:h-[500px] bg-gradient-to-br from-slate-900/90 to-slate-950/90 border border-slate-700 rounded-3xl backdrop-blur-xl shadow-2xl flex items-center justify-center cursor-default"
+            className="relative w-80 h-80 md:w-[500px] md:h-[500px] bg-gradient-to-br from-slate-900/90 to-slate-950/90 border border-slate-700 rounded-3xl backdrop-blur-xl shadow-2xl flex items-center justify-center cursor-default will-change-transform"
           >
-            {/* Motion logic for physics is handled via style prop binding above, 
-                but we use a spring transition for the return-to-center animation in CSS/style-binding via framer-motion defaults */}
-            
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-blue-500/10 to-transparent pointer-events-none" />
             
             <motion.div 
@@ -160,7 +156,6 @@ const Hero: React.FC<HeroProps> = ({ t }) => {
               <Logo className="w-40 h-40 md:w-64 md:h-64 drop-shadow-[0_0_35px_rgba(59,130,246,0.5)]" />
             </motion.div>
 
-            {/* Floating Elements for Depth */}
             <motion.div 
               style={{ transform: "translateZ(80px)" }}
               className="absolute top-10 right-10 w-20 h-1 bg-blue-500 rounded-full opacity-50" 
@@ -173,11 +168,10 @@ const Hero: React.FC<HeroProps> = ({ t }) => {
         </div>
       </motion.div>
 
-      {/* Scroll Indicator */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, y: [0, 8, 0] }}
-        transition={{ delay: 1.5, repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+        transition={{ delay: 1, repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
         className="absolute bottom-10 left-1/2 -translate-x-1/2 text-slate-500"
       >
         <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-blue-500 to-transparent" />

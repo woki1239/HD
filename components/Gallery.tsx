@@ -24,7 +24,7 @@ const Gallery: React.FC<GalleryProps> = ({ t }) => {
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-10%" }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="text-4xl md:text-6xl font-heading font-black text-white w-full md:w-auto text-start break-words max-w-full"
           >
             {t.gallery.titleSelected} <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">{t.gallery.titleWorks}</span>
@@ -34,7 +34,7 @@ const Gallery: React.FC<GalleryProps> = ({ t }) => {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.8 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
             className="text-slate-400 mt-4 md:mt-0 font-light self-start md:self-auto"
           >
             {t.gallery.subtitle}
@@ -48,9 +48,11 @@ const Gallery: React.FC<GalleryProps> = ({ t }) => {
               key={index}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-10%" }}
-              transition={{ delay: index * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className={`relative group overflow-hidden rounded-lg cursor-none ${index === 1 ? 'md:mt-12' : index === 3 ? 'md:-mt-12' : ''}`}
+              // INCREASED MARGIN: Triggers load 200px BEFORE coming into view
+              viewport={{ once: true, margin: "200px" }} 
+              // FASTER STAGGER: Images appear almost simultaneously
+              transition={{ delay: index * 0.05, duration: 0.5, ease: "easeOut" }}
+              className={`relative group overflow-hidden rounded-lg cursor-none ${index === 1 ? 'md:mt-12' : index === 3 ? 'md:-mt-12' : ''} will-change-transform`}
             >
               <div className="relative aspect-[3/4] overflow-hidden bg-slate-900 rounded-lg">
                 <motion.img 
@@ -58,6 +60,10 @@ const Gallery: React.FC<GalleryProps> = ({ t }) => {
                   transition={{ duration: 0.6, ease: "easeOut" }}
                   src={src} 
                   alt={`Project ${index + 1}`}
+                  width="600"
+                  height="800"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 opacity-80 group-hover:opacity-100"
                   onError={(e) => {
                     e.currentTarget.src = 'https://images.unsplash.com/photo-1542206395-9feb3edaa68d?q=80&w=800&auto=format&fit=crop';
